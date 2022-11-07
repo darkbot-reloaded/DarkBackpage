@@ -1,0 +1,25 @@
+{
+  "name": "dark_backpage",
+  "version": "1.0.0",
+  "description": "DarkBot backpage",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win=zip"
+  },
+  "devDependencies": {
+    "electron": "11.5.0",
+    "electron-builder": "^23.6.0"
+  },
+  "build": {
+    "appId": "eu.darkbot.backpage",
+    "productName": "Dark Backpage",
+    "extraResources": [
+      "./res/**"
+    ],
+
+    "directories" :{
+      "buildResources": "res"
+    }
+  }
+}
