@@ -52,7 +52,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit()
 })
-
+//
 function parseArgv() {
     let url, sid
     for (let i = 0; i < process.argv.length && !(url && sid); i++) {
