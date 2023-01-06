@@ -14,9 +14,9 @@ function createWindow() {
         webPreferences: {
             plugins: true,
             sandbox: false,
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true,
+            // nodeIntegration: true,
+            // contextIsolation: false,
+            // enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
     })
@@ -26,6 +26,10 @@ function createWindow() {
         event.preventDefault()
         mainWindow.loadURL(url)
     })
+
+    mainWindow.on('page-title-updated', (evt) => {
+        evt.preventDefault();
+    });
 
     const {url, sid} = parseArgv();
     if (url && sid) {

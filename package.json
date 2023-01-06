@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win=zip"
+    "dist": "electron-builder"
   },
   "devDependencies": {
     "electron": "11.5.0",
@@ -20,6 +20,15 @@
 
     "directories" :{
       "buildResources": "res"
+    },
+    "mac": {
+      "target": "zip"
+    },
+    "win": {
+      "target": "zip"
+    },
+    "linux": {
+      "target": "zip"
     }
   }
 }
