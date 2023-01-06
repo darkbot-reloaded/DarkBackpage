@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build": "electron-builder --publish always"
   },
   "devDependencies": {
     "electron": "11.5.0",
