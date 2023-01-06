@@ -1,6 +1,6 @@
 {
   "name": "dark_backpage",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "DarkBot backpage",
   "main": "src/main.js",
   "scripts": {
@@ -15,6 +15,10 @@
   "build": {
     "appId": "eu.darkbot.backpage",
     "productName": "Dark Backpage",
+    "artifactName": "backpage-${version}-${arch}.${ext}",
+    "asar": true,
+    "npmRebuild": true,
+    "buildDependenciesFromSource": false,
     "extraResources": [
       "./res/**"
     ],
