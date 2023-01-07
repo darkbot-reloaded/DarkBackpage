@@ -1,5 +1,6 @@
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
+const {initSplashScreen} = require("@trodi/electron-splashscreen")
 
 app.commandLine.appendSwitch('ppapi-flash-path', getFlashPath())
 
@@ -11,21 +12,30 @@ function createWindow() {
         icon = path.join(process.resourcesPath, "res", "icon.png")
     }
 
-    mainWindow = new BrowserWindow({
-        width: 1400,
-        height: 900,
-        darkTheme: true,
-        icon: icon,
-        autoHideMenuBar: true,
-        title: "Dark Backpage",
-        webPreferences: {
-            plugins: true,
-            sandbox: false,
-            // nodeIntegration: true,
-            // contextIsolation: false,
-            // enableRemoteModule: true,
-            preload: path.join(__dirname, 'preload.js')
-        }
+    mainWindow = initSplashScreen({
+        windowOpts: {
+            width: 1400,
+            height: 900,
+            darkTheme: true,
+            icon: icon,
+            autoHideMenuBar: true,
+            title: "Dark Backpage",
+            webPreferences: {
+                plugins: true,
+                sandbox: false,
+                // nodeIntegration: true,
+                // contextIsolation: false,
+                // enableRemoteModule: true,
+                preload: path.join(__dirname, 'preload.js')
+            }
+        },
+        templateUrl: `${__dirname}/splash.html`,
+        splashScreenOpts: {
+            width: 350,
+            height: 350,
+            transparent: true
+        },
+        minVisible: 0,
     })
 
     mainWindow.webContents.userAgent = 'BigpointClient/1.6.7'
