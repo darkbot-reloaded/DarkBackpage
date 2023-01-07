@@ -35,7 +35,6 @@ function createWindow() {
     })
 
     mainWindow.on('page-title-updated', (evt) => {
-        console.log("path: " + getFlashPath())
         evt.preventDefault();
     });
 
