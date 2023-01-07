@@ -6,10 +6,16 @@ app.commandLine.appendSwitch('ppapi-flash-path', getFlashPath())
 let mainWindow
 
 function createWindow() {
+    let icon;
+    if (process.platform === "linux") {
+        icon = path.join(process.resourcesPath, "res", "icon.png")
+    }
+
     mainWindow = new BrowserWindow({
         width: 1400,
         height: 900,
         darkTheme: true,
+        icon: icon,
         autoHideMenuBar: true,
         title: "Dark Backpage",
         webPreferences: {
