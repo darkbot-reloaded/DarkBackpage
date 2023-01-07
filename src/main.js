@@ -1,22 +1,29 @@
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
 
-app.commandLine.appendSwitch('ppapi-flash-path', path.join(process.resourcesPath, 'res', 'pepflashplayer.dll'))
+app.commandLine.appendSwitch('ppapi-flash-path', getFlashPath())
 
 let mainWindow
 
 function createWindow() {
+    let icon;
+    if (process.platform === "linux") {
+        icon = path.join(process.resourcesPath, "res", "icon.png")
+    }
+
     mainWindow = new BrowserWindow({
         width: 1400,
         height: 900,
+        darkTheme: true,
+        icon: icon,
         autoHideMenuBar: true,
         title: "Dark Backpage",
         webPreferences: {
             plugins: true,
             sandbox: false,
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true,
+            // nodeIntegration: true,
+            // contextIsolation: false,
+            // enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
     })
@@ -27,10 +34,15 @@ function createWindow() {
         mainWindow.loadURL(url)
     })
 
+    mainWindow.on('page-title-updated', (evt) => {
+        console.log("path: " + getFlashPath())
+        evt.preventDefault();
+    });
+
     const {url, sid} = parseArgv();
     if (url && sid) {
         mainWindow.webContents.session.cookies.set({url: url, name: 'dosid', value: sid})
-            .then(r => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
+            .then(() => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
     } else {
         mainWindow.loadURL('https://darkorbit.com')
         //mainWindow.loadFile(path.join(__dirname, 'index.html'))
@@ -61,4 +73,17 @@ function parseArgv() {
         }
     }
     return {url, sid};
+}
+
+function getFlashPath() {
+    switch (process.platform) {
+        case "darwin":
+            return path.join(process.resourcesPath, 'res', 'flash.plugin')
+        case "linux":
+            app.commandLine.appendSwitch("--no-sandbox")
+            return path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
+        case "win32":
+            return path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
+    }
+    return ""
 }
