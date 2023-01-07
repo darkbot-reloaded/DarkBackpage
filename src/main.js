@@ -16,8 +16,9 @@ function createWindow() {
         windowOpts: {
             width: 1400,
             height: 900,
-            darkTheme: true,
             icon: icon,
+            show: false,
+            darkTheme: true,
             autoHideMenuBar: true,
             title: "Dark Backpage",
             webPreferences: {
@@ -31,11 +32,13 @@ function createWindow() {
         },
         templateUrl: `${__dirname}/splash.html`,
         splashScreenOpts: {
-            width: 350,
-            height: 350,
-            transparent: true
+            width: 300,
+            height: 300,
+            transparent: true,
+            alwaysOnTop: true
         },
         minVisible: 0,
+        delay: 0
     })
 
     mainWindow.webContents.userAgent = 'BigpointClient/1.6.7'
