@@ -14,9 +14,9 @@ function createWindow() {
         webPreferences: {
             plugins: true,
             sandbox: false,
-            // nodeIntegration: true,
-            // contextIsolation: false,
-            // enableRemoteModule: true,
+            nodeIntegration: true,
+            contextIsolation: false,
+            enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
     })
@@ -28,6 +28,7 @@ function createWindow() {
     })
 
     mainWindow.on('page-title-updated', (evt) => {
+        console.log("path: " + getFlashPath())
         evt.preventDefault();
     });
 
@@ -67,13 +68,18 @@ function parseArgv() {
 }
 
 function getFlashPath() {
+    let p;
     switch (process.platform) {
         case "darwin":
-            return path.join(process.resourcesPath, 'res', 'flash.plugin')
+            p= path.join(process.resourcesPath, 'res', 'flash.plugin')
+            break
         case "linux":
-            return path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
+            p = path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
+            break
         case "win32":
-            return path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
+            p = path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
+            break
     }
-    return ""
+    console.log(p)
+    return p
 }

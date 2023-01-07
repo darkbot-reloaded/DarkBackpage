@@ -1,6 +1,6 @@
 {
   "name": "dark_backpage",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "DarkBot backpage",
   "main": "src/main.js",
   "scripts": {
@@ -22,8 +22,7 @@
     "extraResources": [
       "./res/**"
     ],
-
-    "directories" :{
+    "directories": {
       "buildResources": "res"
     },
     "mac": {
