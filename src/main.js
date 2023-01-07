@@ -1,7 +1,7 @@
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
 
-app.commandLine.appendSwitch('ppapi-flash-path', path.join(process.resourcesPath, 'res', 'pepflashplayer.dll'))
+app.commandLine.appendSwitch('ppapi-flash-path', getFlashPath())
 
 let mainWindow
 
@@ -64,4 +64,16 @@ function parseArgv() {
         }
     }
     return {url, sid};
+}
+
+function getFlashPath() {
+    switch (process.platform) {
+        case "darwin":
+            return path.join(process.resourcesPath, 'res', 'flash.plugin')
+        case "linux":
+            return path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
+        case "win32":
+            return path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
+    }
+    return ""
 }
