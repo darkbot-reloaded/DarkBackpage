@@ -9,14 +9,15 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1400,
         height: 900,
+        darkTheme: true,
         autoHideMenuBar: true,
         title: "Dark Backpage",
         webPreferences: {
             plugins: true,
             sandbox: false,
-            nodeIntegration: true,
-            contextIsolation: false,
-            enableRemoteModule: true,
+            // nodeIntegration: true,
+            // contextIsolation: false,
+            // enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
     })
@@ -35,7 +36,7 @@ function createWindow() {
     const {url, sid} = parseArgv();
     if (url && sid) {
         mainWindow.webContents.session.cookies.set({url: url, name: 'dosid', value: sid})
-            .then(r => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
+            .then(() => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
     } else {
         mainWindow.loadURL('https://darkorbit.com')
         //mainWindow.loadFile(path.join(__dirname, 'index.html'))
@@ -52,7 +53,8 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit()
-})//
+})
+
 function parseArgv() {
     let url, sid
     for (let i = 0; i < process.argv.length && !(url && sid); i++) {
@@ -68,18 +70,14 @@ function parseArgv() {
 }
 
 function getFlashPath() {
-    let p;
     switch (process.platform) {
         case "darwin":
-            p= path.join(process.resourcesPath, 'res', 'flash.plugin')
-            break
+            return path.join(process.resourcesPath, 'res', 'flash.plugin')
         case "linux":
-            p = path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
-            break
+            app.commandLine.appendSwitch("--no-sandbox")
+            return path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
         case "win32":
-            p = path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
-            break
+            return path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
     }
-    console.log(p)
-    return p
+    return ""
 }

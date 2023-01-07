@@ -1,6 +1,6 @@
 {
   "name": "dark_backpage",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "DarkBot backpage",
   "main": "src/main.js",
   "scripts": {
