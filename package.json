@@ -1,6 +1,6 @@
 {
   "name": "dark_backpage",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "DarkBot backpage",
   "main": "src/main.js",
   "scripts": {
@@ -19,20 +19,29 @@
     "asar": true,
     "npmRebuild": true,
     "buildDependenciesFromSource": false,
-    "extraResources": [
-      "./res/**"
-    ],
     "directories": {
       "buildResources": "res"
     },
     "mac": {
-      "target": "zip"
+      "target": "zip",
+      "extraResources": [
+        "./res/icon.icns",
+        "./res/flash.plugin/**"
+      ]
     },
     "win": {
-      "target": "zip"
+      "target": "zip",
+      "extraResources": [
+        "./res/icon.ico",
+        "./res/pepflashplayer.dll"
+      ]
     },
     "linux": {
-      "target": "zip"
+      "target": "zip",
+      "extraResources": [
+        "./res/icon.png",
+        "./res/libpepflashplayer.so"
+      ]
     }
   },
   "dependencies": {
