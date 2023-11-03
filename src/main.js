@@ -77,7 +77,7 @@ function createWindow() {
             const {url, sid} = parseArgv();
             if (url && sid) {
                 mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
-                    .then(() => mainWindow.loadURL(url + "/indexInternal.es?action=internalStart"))
+                    .then(() => mainWindow.loadURL(url + "/indexInternal.es?action=internalDock"))
             } else {
                 mainWindow.loadURL("https://darkorbit.com")
                 //mainWindow.loadFile(path.join(__dirname, "index.html"))
