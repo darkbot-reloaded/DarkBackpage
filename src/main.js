@@ -1,6 +1,5 @@
-const {app, BrowserWindow} = require('electron')
+const {app, BrowserWindow, session} = require('electron')
 const path = require('path')
-const {initSplashScreen} = require("@trodi/electron-splashscreen")
 
 app.commandLine.appendSwitch('ppapi-flash-path', getFlashPath())
 
@@ -12,55 +11,56 @@ function createWindow() {
         icon = path.join(process.resourcesPath, "res", "icon.png")
     }
 
-    mainWindow = initSplashScreen({
-        windowOpts: {
-            width: 1400,
-            height: 900,
-            icon: icon,
-            show: false,
-            darkTheme: true,
-            autoHideMenuBar: true,
-            title: "Dark Backpage",
-            webPreferences: {
-                plugins: true,
-                sandbox: false,
-                // nodeIntegration: true,
-                // contextIsolation: false,
-                // enableRemoteModule: true,
-                preload: path.join(__dirname, 'preload.js')
-            }
-        },
-        templateUrl: `${__dirname}/splash.html`,
-        splashScreenOpts: {
-            width: 300,
-            height: 300,
-            transparent: true,
-            alwaysOnTop: true
-        },
-        minVisible: 0,
-        delay: 0
+    mainWindow = new BrowserWindow({
+        backgroundColor: "#161616",
+        width: 1400,
+        height: 900,
+        icon: icon,
+        show: false,
+        darkTheme: true,
+        autoHideMenuBar: true,
+        title: "Dark Backpage",
+        webPreferences: {
+            allowRunningInsecureContent: false,
+            plugins: true,
+            sandbox: false,
+            // nodeIntegration: true,
+            // contextIsolation: false,
+            // enableRemoteModule: true,
+            preload: path.join(__dirname, 'preload.js')
+        }
     })
 
-    mainWindow.webContents.userAgent = 'BigpointClient/1.6.7'
+    mainWindow.webContents.userAgent = 'BigpointClient/1.6.9'
     mainWindow.webContents.on('new-window', (event, url) => {
         event.preventDefault()
         mainWindow.loadURL(url)
     })
 
+    mainWindow.webContents.session.webRequest.onBeforeRequest(
+        (details, callback) => {
+            let cancel = details.url.indexOf("quant") !== -1 || details.url.indexOf("googletag") !== -1
+            callback({cancel: cancel})
+        })
+
     mainWindow.on('page-title-updated', (evt) => {
         evt.preventDefault();
     });
 
-    const {url, sid} = parseArgv();
-    if (url && sid) {
-        mainWindow.webContents.session.cookies.set({url: url, name: 'dosid', value: sid})
-            .then(() => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
-    } else {
-        mainWindow.loadURL('https://darkorbit.com')
-        //mainWindow.loadFile(path.join(__dirname, 'index.html'))
-    }
+    mainWindow.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent("<html></html>"))
+        .then(r => {
+            const {url, sid} = parseArgv();
+            if (url && sid) {
+                mainWindow.webContents.session.cookies.set({url: url, name: 'dosid', value: sid})
+                    .then(() => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
+            } else {
+                mainWindow.loadURL('https://darkorbit.com')
+                //mainWindow.loadFile(path.join(__dirname, 'index.html'))
+            }
+            mainWindow.show();
+        });
 }
-
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 app.whenReady().then(() => {
     createWindow()
 
