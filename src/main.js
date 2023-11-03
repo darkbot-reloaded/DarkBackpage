@@ -1,7 +1,9 @@
-const {app, BrowserWindow, session} = require('electron')
-const path = require('path')
+const {app, BrowserWindow} = require("electron")
+const path = require("path")
+const contextMenu = require("electron-context-menu");
 
-app.commandLine.appendSwitch('ppapi-flash-path', getFlashPath())
+process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
+app.commandLine.appendSwitch("ppapi-flash-path", getFlashPath())
 
 let mainWindow
 
@@ -18,7 +20,6 @@ function createWindow() {
         icon: icon,
         show: false,
         darkTheme: true,
-        autoHideMenuBar: true,
         title: "Dark Backpage",
         webPreferences: {
             allowRunningInsecureContent: false,
@@ -27,12 +28,36 @@ function createWindow() {
             // nodeIntegration: true,
             // contextIsolation: false,
             // enableRemoteModule: true,
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, "preload.js")
         }
     })
 
-    mainWindow.webContents.userAgent = 'BigpointClient/1.6.9'
-    mainWindow.webContents.on('new-window', (event, url) => {
+    contextMenu({
+        menu: (actions, props, browserWindow, dictionarySuggestions) => [
+            {
+                label: "Forward",
+                click: () => mainWindow.webContents.goForward(),
+                visible: mainWindow.webContents.canGoForward()
+            },
+            {
+                label: "Backward",
+                click: () => mainWindow.webContents.goBack(),
+                visible: mainWindow.webContents.canGoBack()
+            },
+            actions.separator(),
+            {
+                role: "reload"
+            },
+            {
+                role: "toggleDevTools"
+            },
+            actions.inspect(),
+            actions.services(),
+        ]
+    })
+
+    mainWindow.webContents.userAgent = "BigpointClient/1.6.9"
+    mainWindow.webContents.on("new-window", (event, url) => {
         event.preventDefault()
         mainWindow.loadURL(url)
     })
@@ -43,7 +68,7 @@ function createWindow() {
             callback({cancel: cancel})
         })
 
-    mainWindow.on('page-title-updated', (evt) => {
+    mainWindow.on("page-title-updated", (evt) => {
         evt.preventDefault();
     });
 
@@ -51,36 +76,36 @@ function createWindow() {
         .then(r => {
             const {url, sid} = parseArgv();
             if (url && sid) {
-                mainWindow.webContents.session.cookies.set({url: url, name: 'dosid', value: sid})
-                    .then(() => mainWindow.loadURL(url + '/indexInternal.es?action=internalStart'))
+                mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
+                    .then(() => mainWindow.loadURL(url + "/indexInternal.es?action=internalStart"))
             } else {
-                mainWindow.loadURL('https://darkorbit.com')
-                //mainWindow.loadFile(path.join(__dirname, 'index.html'))
+                mainWindow.loadURL("https://darkorbit.com")
+                //mainWindow.loadFile(path.join(__dirname, "index.html"))
             }
             mainWindow.show();
         });
 }
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
 app.whenReady().then(() => {
     createWindow()
 
-    app.on('activate', function () {
+    app.on("activate", function () {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 })
 
-app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') app.quit()
+app.on("window-all-closed", function () {
+    if (process.platform !== "darwin") app.quit()
 })
 
 function parseArgv() {
     let url, sid
     for (let i = 0; i < process.argv.length && !(url && sid); i++) {
         switch (process.argv[i]) {
-            case '--url':
+            case "--url":
                 url = process.argv[++i]
                 break
-            case '--sid':
+            case "--sid":
                 sid = process.argv[++i]
         }
     }
@@ -90,12 +115,12 @@ function parseArgv() {
 function getFlashPath() {
     switch (process.platform) {
         case "darwin":
-            return path.join(process.resourcesPath, 'res', 'flash.plugin')
+            return path.join(process.resourcesPath, "res", "flash.plugin")
         case "linux":
             app.commandLine.appendSwitch("--no-sandbox")
-            return path.join(process.resourcesPath, 'res', 'libpepflashplayer.so')
+            return path.join(process.resourcesPath, "res", "libpepflashplayer.so")
         case "win32":
-            return path.join(process.resourcesPath, 'res', 'pepflashplayer.dll')
+            return path.join(process.resourcesPath, "res", "pepflashplayer.dll")
     }
     return ""
 }
