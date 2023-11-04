@@ -5,6 +5,8 @@ const contextMenu = require("electron-context-menu");
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 app.commandLine.appendSwitch("ppapi-flash-path", getFlashPath())
 
+const menuBuilder = require('./menu')
+
 let mainWindow
 
 function createWindow() {
@@ -82,6 +84,8 @@ function createWindow() {
                 mainWindow.loadURL("https://darkorbit.com")
                 //mainWindow.loadFile(path.join(__dirname, "index.html"))
             }
+
+            menuBuilder(url || "https://darkorbit.com", mainWindow)
             mainWindow.show();
         });
 }
