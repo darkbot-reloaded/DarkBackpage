@@ -8,27 +8,27 @@ module.exports = function menuBuilder(url, mainWindow) {
             submenu: [
                 {
                     label: "Dock",
-                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalDock`)
+                    click: () => mainWindow.loadURL(`${url}/indexInternal.es?action=internalDock`)
                 },
                 {
                     label: "Clan",
-                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalNewClan`)
+                    click: () => mainWindow.loadURL(`${url}/indexInternal.es?action=internalNewClan`)
                 },
                 {
                     label: "Shop",
-                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalDock&tpl=internalDockShips&checkOffer`)
+                    click: () => mainWindow.loadURL(`${url}/indexInternal.es?action=internalDock&tpl=internalDockShips&checkOffer`)
                 },
                 {
                     label: "Skylab",
-                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalSkylab`)
+                    click: () => mainWindow.loadURL(`${url}/indexInternal.es?action=internalSkylab`)
                 },
                 {
                     label: "Pilot Sheet",
-                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalPilotSheet`)
+                    click: () => mainWindow.loadURL(`${url}/indexInternal.es?action=internalPilotSheet`)
                 },
                 {
                     label: "Auction",
-                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalAuction`)
+                    click: () => mainWindow.loadURL(`${url}/indexInternal.es?action=internalAuction`)
                 }
             ]
         },
