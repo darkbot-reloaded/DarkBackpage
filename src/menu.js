@@ -1,25 +1,35 @@
 const { Menu } = require('electron')
 const { shell } = require('electron')
 
-module.exports = function menuBuilder(argvUrl, mainWindow) {
-    const createDarkbotMenu = (label, qs) => ({
-        label,
-        click() {
-            const url = `${argvUrl}/indexInternal.es?${qs}`
-            mainWindow.loadURL(url)
-        }
-    })
-
+module.exports = function menuBuilder(url, mainWindow) {
     const template = [
         {
             label: 'Darkorbit',
             submenu: [
-              createDarkbotMenu('Dock', 'action=internalDock'),
-              createDarkbotMenu('Clan', 'action=internalNewClan'),
-              createDarkbotMenu('Shop', 'action=internalDock&tpl=internalDockShips&checkOffer'),
-              createDarkbotMenu('Skylab', 'action=internalSkylab'),
-              createDarkbotMenu('Pilot Sheet', 'action=internalPilotSheet'),
-              createDarkbotMenu('Auction', 'action=internalAuction'),
+                {
+                    label: "Dock",
+                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalDock`)
+                },
+                {
+                    label: "Clan",
+                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalNewClan`)
+                },
+                {
+                    label: "Shop",
+                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalDock&tpl=internalDockShips&checkOffer`)
+                },
+                {
+                    label: "Skylab",
+                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalSkylab`)
+                },
+                {
+                    label: "Pilot Sheet",
+                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalPilotSheet`)
+                },
+                {
+                    label: "Auction",
+                    click: () => mainWindow.loadUrl(`${url}/indexInternal.es?action=internalAuction`)
+                }
             ]
         },
         { role: 'fileMenu' },
