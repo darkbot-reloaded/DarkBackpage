@@ -12,11 +12,16 @@ function createWindow() {
     if (process.platform === "linux") {
         icon = path.join(process.resourcesPath, "res", "icon.png")
     }
+    const {url, sid, captcha, timeout} = parseArgv();
+    let resolveCaptcha = url != null && !sid && captcha != null;
 
     mainWindow = new BrowserWindow({
         backgroundColor: "#161616",
-        width: 1400,
-        height: 900,
+        width: resolveCaptcha ? 320 : 1400,
+        height: resolveCaptcha ? 95 : 900,
+        frame: !resolveCaptcha,
+        autoHideMenuBar: resolveCaptcha,
+        alwaysOnTop: resolveCaptcha,
         icon: icon,
         show: false,
         darkTheme: true,
@@ -25,12 +30,34 @@ function createWindow() {
             allowRunningInsecureContent: false,
             plugins: true,
             sandbox: false,
-            // nodeIntegration: true,
-            // contextIsolation: false,
-            // enableRemoteModule: true,
+            nodeIntegration: resolveCaptcha,
+            enableRemoteModule: resolveCaptcha,
             preload: path.join(__dirname, "preload.js")
         }
     })
+
+    if (timeout > 0) {
+        setTimeout(function () {
+            app.quit();
+        }, timeout)
+    }
+
+    if (resolveCaptcha) {
+        global.captchaResult = function(result){
+            process.stdout.write("[captchaResult]" + result)
+            process.stdout.write("\n")
+        }
+
+        global.captchaFailed = function(){
+            process.stdout.write("[captchaError]")
+            process.stdout.write("\n")
+        }
+
+        global.onOpen = function(){
+            mainWindow.setSize(400, 600)
+            mainWindow.center()
+        }
+    }
 
     contextMenu({
         menu: (actions, props, browserWindow, dictionarySuggestions) => [
@@ -74,13 +101,32 @@ function createWindow() {
 
     mainWindow.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent("<html></html>"))
         .then(r => {
-            const {url, sid} = parseArgv();
             if (url && sid) {
                 mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
                     .then(() => mainWindow.loadURL(url + "/indexInternal.es?action=internalDock"))
+            } else if (resolveCaptcha) {
+                try {
+                    mainWindow.webContents.debugger.attach('1.1')
+                } catch (err) {
+                    console.log('Debugger attach failed : ', err)
+                }
+
+                mainWindow.webContents.debugger.on('message', (event, method, params) => {
+                    if (method === "Fetch.requestPaused") {
+                        mainWindow.webContents.debugger.sendCommand("Fetch.fulfillRequest", {
+                            requestId: params.requestId,
+                            responseCode: 200,
+                            body: getCaptchaSiteBody(captcha)
+                        }).then(() => {
+                            mainWindow.webContents.debugger.detach();
+                        })
+                    }
+                })
+
+                mainWindow.webContents.debugger.sendCommand("Fetch.enable", {patterns: [{urlPattern: "*", requestStage: "Response"}]});
+                mainWindow.loadURL(url)
             } else {
-                mainWindow.loadURL("https://darkorbit.com")
-                //mainWindow.loadFile(path.join(__dirname, "index.html"))
+                mainWindow.loadURL(url == null ? "https://www.darkorbit.com" : url)
             }
             mainWindow.show();
         });
@@ -99,7 +145,7 @@ app.on("window-all-closed", function () {
 })
 
 function parseArgv() {
-    let url, sid
+    let url = null, sid = null, captcha = null, timeout = -1;
     for (let i = 0; i < process.argv.length && !(url && sid); i++) {
         switch (process.argv[i]) {
             case "--url":
@@ -107,9 +153,15 @@ function parseArgv() {
                 break
             case "--sid":
                 sid = process.argv[++i]
+                break
+            case "--captcha":
+                captcha = process.argv[++i];
+                break
+            case "--exit":
+                timeout = Number(process.argv[++i])
         }
     }
-    return {url, sid};
+    return {url, sid, captcha, timeout};
 }
 
 function getFlashPath() {
@@ -123,4 +175,40 @@ function getFlashPath() {
             return path.join(process.resourcesPath, "res", "pepflashplayer.dll")
     }
     return ""
+}
+
+function getCaptchaSiteBody(captchaSiteKey) {
+    let body = `<html>
+<head>
+    <script src="https://js.hcaptcha.com/1/api.js?onload=onLoad" async defer></script>
+</head>
+<body>
+<script type="text/javascript">
+    function onResult(result) {
+        let {remote} = require('electron');
+        remote.getGlobal("captchaResult")(result)
+    }
+    
+    function onError() {
+        let {remote} = require('electron');
+        remote.getGlobal("captchaFailed")()
+    }
+    
+    function onOpen() {
+        let {remote} = require('electron');
+        remote.getGlobal("onOpen")()
+    }
+</script>
+
+<div class="h-captcha"
+     data-theme="dark"
+     data-sitekey="%SITE_KEY%"
+     data-callback="onResult"
+     data-error-callback="onError"
+     data-open-callback="onOpen"
+     ></div>
+</body>
+</html>`
+
+    return Buffer.from(body.replace("%SITE_KEY%", captchaSiteKey)).toString("base64");
 }
