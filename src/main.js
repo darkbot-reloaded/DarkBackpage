@@ -12,7 +12,7 @@ function createWindow() {
     if (process.platform === "linux") {
         icon = path.join(process.resourcesPath, "res", "icon.png")
     }
-    const {url, sid, captcha, timeout} = parseArgv();
+    const {url, sid, captcha, timeout, fullUrl} = parseArgv();
     let resolveCaptcha = url != null && !sid && captcha != null;
 
     mainWindow = new BrowserWindow({
@@ -101,9 +101,9 @@ function createWindow() {
 
     mainWindow.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent("<html></html>"))
         .then(r => {
-            if (url && sid) {
+            if ((url || fullUrl) && sid) {
                 mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
-                    .then(() => mainWindow.loadURL(url + "/indexInternal.es?action=internalDock"))
+                    .then(() => mainWindow.loadURL(fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock")))
             } else if (resolveCaptcha) {
                 try {
                     mainWindow.webContents.debugger.attach('1.1')
@@ -145,11 +145,14 @@ app.on("window-all-closed", function () {
 })
 
 function parseArgv() {
-    let url = null, sid = null, captcha = null, timeout = -1;
-    for (let i = 0; i < process.argv.length && !(url && sid); i++) {
+    let url = null, sid = null, captcha = null, timeout = -1, fullUrl = null;
+    for (let i = 0; i < process.argv.length; i++) {
         switch (process.argv[i]) {
             case "--url":
                 url = process.argv[++i]
+                break
+            case "--fullurl":
+                fullUrl = process.argv[++i]
                 break
             case "--sid":
                 sid = process.argv[++i]
@@ -161,7 +164,7 @@ function parseArgv() {
                 timeout = Number(process.argv[++i])
         }
     }
-    return {url, sid, captcha, timeout};
+    return {url, sid, captcha, timeout, fullUrl};
 }
 
 function getFlashPath() {
@@ -180,7 +183,7 @@ function getFlashPath() {
 function getCaptchaSiteBody(captchaSiteKey) {
     let body = `<html>
 <head>
-    <script src="https://js.hcaptcha.com/1/api.js?onload=onLoad" async defer></script>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 </head>
 <body>
 <script type="text/javascript">
