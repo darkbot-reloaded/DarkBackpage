@@ -18,7 +18,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         backgroundColor: "#161616",
         width: resolveCaptcha ? 320 : 1400,
-        height: resolveCaptcha ? 95 : 900,
+        height: resolveCaptcha ? (timeout > 0 ? 115 : 95) : 900,
         frame: !resolveCaptcha,
         autoHideMenuBar: resolveCaptcha,
         alwaysOnTop: resolveCaptcha,
@@ -116,7 +116,7 @@ function createWindow() {
                         mainWindow.webContents.debugger.sendCommand("Fetch.fulfillRequest", {
                             requestId: params.requestId,
                             responseCode: 200,
-                            body: getCaptchaSiteBody(captcha)
+                            body: getCaptchaSiteBody(captcha, timeout || 60)
                         }).then(() => {
                             mainWindow.webContents.debugger.detach();
                         })
@@ -180,7 +180,7 @@ function getFlashPath() {
     return ""
 }
 
-function getCaptchaSiteBody(captchaSiteKey) {
+function getCaptchaSiteBody(captchaSiteKey, timeout) {
     let body = `<html>
 <head>
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
@@ -203,6 +203,8 @@ function getCaptchaSiteBody(captchaSiteKey) {
     }
 </script>
 
+%PROGRESS_BAR%
+
 <div class="h-captcha"
      data-theme="dark"
      data-sitekey="%SITE_KEY%"
@@ -212,6 +214,27 @@ function getCaptchaSiteBody(captchaSiteKey) {
      ></div>
 </body>
 </html>`
+
+    let progressBar = `
+<progress value="COUNTDOWN" max="COUNTDOWN" id="progressBar"></progress>
+<script type="application/javascript">
+    let progressBar = document.getElementById("progressBar")
+    progressBar.style.width = "300px";
+
+    let startDate = new Date();
+    let progressTimer = setInterval(function () {
+        let usedTime = (new Date() - startDate);
+        progressBar.value = COUNTDOWN - usedTime;
+
+        if (COUNTDOWN - usedTime <= 0) {
+            clearInterval(progressTimer);
+        }
+    }, 15);
+</script>`
+
+    if (timeout > 0) {
+        body = body.replace("%PROGRESS_BAR%", progressBar.replaceAll("COUNTDOWN", timeout))
+    } else body = body.replace("%PROGRESS_BAR%", "")
 
     return Buffer.from(body.replace("%SITE_KEY%", captchaSiteKey)).toString("base64");
 }
