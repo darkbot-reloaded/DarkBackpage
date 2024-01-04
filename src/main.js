@@ -147,24 +147,29 @@ app.on("window-all-closed", function () {
 function parseArgv() {
     let url = null, sid = null, captcha = null, timeout = -1, fullUrl = null;
     for (let i = 0; i < process.argv.length; i++) {
-        switch (process.argv[i]) {
-            case "--url":
-                url = process.argv[++i]
-                break
-            case "--fullurl":
-                fullUrl = process.argv[++i]
-                break
-            case "--sid":
-                sid = process.argv[++i]
-                break
-            case "--captcha":
-                captcha = process.argv[++i];
-                break
-            case "--exit":
-                timeout = Number(process.argv[++i])
-        }
+        let temp = null;
+        if ((temp = parse("--url", i)) != null)
+            url = temp;
+        else if ((temp = parse("--fullurl", i)) != null)
+            fullUrl = temp;
+        else if ((temp = parse("--sid", i)) != null)
+            sid = temp;
+        else if ((temp = parse("--captcha", i)) != null)
+            captcha = temp;
+        else if ((temp = parse("--exit", i)) != null)
+            timeout = Number(temp)
     }
     return {url, sid, captcha, timeout, fullUrl};
+}
+
+function parse(name, idx) {
+    if (process.argv[idx] === name)
+        return process.argv[idx + 1];
+    if (process.argv[idx].includes(name)) {
+        return process.argv[idx].substring(name.length + 1)
+    }
+
+    return null;
 }
 
 function getFlashPath() {
