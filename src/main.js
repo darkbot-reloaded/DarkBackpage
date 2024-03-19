@@ -80,8 +80,117 @@ function createWindow() {
             },
             actions.inspect(),
             actions.services(),
+			{
+				label: "Change Language",
+				submenu: submenu: [
+					{
+						label: "Bulgarian",
+						click: () => {
+							reloadWithLanguage("bg");
+						}
+					},
+					{
+						label: "Czech",
+						click: () => {
+							reloadWithLanguage("cs");
+						}
+					},
+					{
+						label: "German",
+						click: () => {
+							reloadWithLanguage("de");
+						}
+					},
+					{
+						label: "Greek",
+						click: () => {
+							reloadWithLanguage("el");
+						}
+					},
+					{
+						label: "English",
+						click: () => {
+							reloadWithLanguage("en");
+						}
+					},
+					{
+						label: "Spanish",
+						click: () => {
+							reloadWithLanguage("es");
+						}
+					},
+					{
+						label: "French",
+						click: () => {
+							reloadWithLanguage("fr");
+						}
+					},
+					{
+						label: "Hungarian",
+						click: () => {
+							reloadWithLanguage("hu");
+						}
+					},
+					{
+						label: "Italian",
+						click: () => {
+							reloadWithLanguage("it");
+						}
+					},
+					{
+						label: "Lithuanian",
+						click: () => {
+							reloadWithLanguage("lt");
+						}
+					},
+					{
+						label: "Polish",
+						click: () => {
+							reloadWithLanguage("pl");
+						}
+					},
+					{
+						label: "Portuguese",
+						click: () => {
+							reloadWithLanguage("pt");
+						}
+					},
+					{
+						label: "Romanian",
+						click: () => {
+							reloadWithLanguage("ro");
+						}
+					},
+					{
+						label: "Russian",
+						click: () => {
+							reloadWithLanguage("ru");
+						}
+					},
+					{
+						label: "Swedish",
+						click: () => {
+							reloadWithLanguage("sv");
+						}
+					},
+					{
+						label: "Turkish",
+						click: () => {
+							reloadWithLanguage("tr");
+						}
+					},
+					{
+						label: "Ukrainian",
+						click: () => {
+							reloadWithLanguage("uk");
+						}
+					},
+					// Add more languages as needed
+				]
+			}
         ]
     })
+
 
     mainWindow.webContents.userAgent = "BigpointClient/1.6.9"
     mainWindow.webContents.on("new-window", (event, url) => {
@@ -188,6 +297,11 @@ function getFlashPath() {
     }
     return ""
 }
+
+function reloadWithLanguage(language) {
+    mainWindow.loadURL(mainWindow.webContents.getURL() + (mainWindow.webContents.getURL().includes("?") ? "&" : "?") + "lang=" + language);
+}
+
 
 function getCaptchaSiteBody(captchaSiteKey, timeout) {
     let body = `<html>
