@@ -12,7 +12,7 @@ function createWindow() {
     if (process.platform === "linux") {
         icon = path.join(process.resourcesPath, "res", "icon.png")
     }
-    const {url, sid, captcha, timeout, fullUrl} = parseArgv();
+    const {url, sid, captcha, timeout, fullUrl, lang} = parseArgv();
     let resolveCaptcha = url != null && !sid && captcha != null;
 
     mainWindow = new BrowserWindow({
@@ -102,8 +102,10 @@ function createWindow() {
     mainWindow.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent("<html></html>"))
         .then(r => {
             if ((url || fullUrl) && sid) {
+                const finalUrl = fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock")
+                if (lang) finalUrl += finalUrl.includes("?") ? `&lang=${lang}` : `?lang=${lang}`;
                 mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
-                    .then(() => mainWindow.loadURL(fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock")))
+                    .then(() => mainWindow.loadURL(finalUrl))
             } else if (resolveCaptcha) {
                 try {
                     mainWindow.webContents.debugger.attach('1.1')
@@ -145,7 +147,7 @@ app.on("window-all-closed", function () {
 })
 
 function parseArgv() {
-    let url = null, sid = null, captcha = null, timeout = -1, fullUrl = null;
+    let url = null, sid = null, captcha = null, timeout = -1, fullUrl = null, lang = null;
     for (let i = 0; i < process.argv.length; i++) {
         let temp = null;
         if ((temp = parse("--url", i)) != null)
@@ -158,8 +160,10 @@ function parseArgv() {
             captcha = temp;
         else if ((temp = parse("--exit", i)) != null)
             timeout = Number(temp)
+        else if ((temp = parse("--lang", i)) != null)
+            lang = temp
     }
-    return {url, sid, captcha, timeout, fullUrl};
+    return {url, sid, captcha, timeout, fullUrl, lang};
 }
 
 function parse(name, idx) {
