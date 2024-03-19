@@ -80,9 +80,10 @@ function createWindow() {
             },
             actions.inspect(),
             actions.services(),
+            actions.separator(),
 			{
 				label: "Change Language",
-				submenu: submenu: [
+				submenu: [
 					{
 						label: "Bulgarian",
 						click: () => {
@@ -299,7 +300,13 @@ function getFlashPath() {
 }
 
 function reloadWithLanguage(language) {
-    mainWindow.loadURL(mainWindow.webContents.getURL() + (mainWindow.webContents.getURL().includes("?") ? "&" : "?") + "lang=" + language);
+    const urlObject = new URL(mainWindow.webContents.getURL());
+    const params = urlObject.searchParams;
+    params.delete('lang');
+    params.append('lang', language);
+    urlObject.search = params.toString();
+    
+    mainWindow.loadURL(urlObject.toString());
 }
 
 
