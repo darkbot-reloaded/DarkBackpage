@@ -58,6 +58,26 @@ function createWindow() {
             mainWindow.center()
         }
     }
+	
+	const languages = [
+		["Bulgarian", "bg"],
+		["Czech", "cs"],
+		["German", "de"],
+		["Greek", "el"],
+		["English", "en"],
+		["Spanish", "es"],
+		["French", "fr"],
+		["Hungarian", "hu"],
+		["Italian", "it"],
+		["Lithuanian", "lt"],
+		["Polish", "pl"],
+		["Portuguese", "pt"],
+		["Romanian", "ro"],
+		["Russian", "ru"],
+		["Swedish", "sv"],
+		["Turkish", "tr"],
+		["Ukrainian", "uk"]
+	];
 
     contextMenu({
         menu: (actions, props, browserWindow, dictionarySuggestions) => [
@@ -83,111 +103,10 @@ function createWindow() {
             actions.separator(),
 			{
 				label: "Change Language",
-				submenu: [
-					{
-						label: "Bulgarian",
-						click: () => {
-							reloadWithLanguage("bg");
-						}
-					},
-					{
-						label: "Czech",
-						click: () => {
-							reloadWithLanguage("cs");
-						}
-					},
-					{
-						label: "German",
-						click: () => {
-							reloadWithLanguage("de");
-						}
-					},
-					{
-						label: "Greek",
-						click: () => {
-							reloadWithLanguage("el");
-						}
-					},
-					{
-						label: "English",
-						click: () => {
-							reloadWithLanguage("en");
-						}
-					},
-					{
-						label: "Spanish",
-						click: () => {
-							reloadWithLanguage("es");
-						}
-					},
-					{
-						label: "French",
-						click: () => {
-							reloadWithLanguage("fr");
-						}
-					},
-					{
-						label: "Hungarian",
-						click: () => {
-							reloadWithLanguage("hu");
-						}
-					},
-					{
-						label: "Italian",
-						click: () => {
-							reloadWithLanguage("it");
-						}
-					},
-					{
-						label: "Lithuanian",
-						click: () => {
-							reloadWithLanguage("lt");
-						}
-					},
-					{
-						label: "Polish",
-						click: () => {
-							reloadWithLanguage("pl");
-						}
-					},
-					{
-						label: "Portuguese",
-						click: () => {
-							reloadWithLanguage("pt");
-						}
-					},
-					{
-						label: "Romanian",
-						click: () => {
-							reloadWithLanguage("ro");
-						}
-					},
-					{
-						label: "Russian",
-						click: () => {
-							reloadWithLanguage("ru");
-						}
-					},
-					{
-						label: "Swedish",
-						click: () => {
-							reloadWithLanguage("sv");
-						}
-					},
-					{
-						label: "Turkish",
-						click: () => {
-							reloadWithLanguage("tr");
-						}
-					},
-					{
-						label: "Ukrainian",
-						click: () => {
-							reloadWithLanguage("uk");
-						}
-					},
-					// Add more languages as needed
-				]
+				submenu: languages.map(([languageName, languageCode]) => ({
+					label: languageName,
+					click: () => reloadWithLanguage(languageCode)
+				}))
 			}
         ]
     })
@@ -212,8 +131,7 @@ function createWindow() {
     mainWindow.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent("<html></html>"))
         .then(r => {
             if ((url || fullUrl) && sid) {
-                const finalUrl = fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock")
-                if (lang) finalUrl += finalUrl.includes("?") ? `&lang=${lang}` : `?lang=${lang}`;
+                const finalUrl = generateLangUrl(fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock"), lang)
                 mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
                     .then(() => mainWindow.loadURL(finalUrl))
             } else if (resolveCaptcha) {
@@ -299,14 +217,28 @@ function getFlashPath() {
     return ""
 }
 
-function reloadWithLanguage(language) {
-    const urlObject = new URL(mainWindow.webContents.getURL());
+function reloadWithLanguage(lang) {
+    mainWindow.loadURL(generateLangUrl(mainWindow.webContents.getURL(), lang));
+}
+
+function generateLangUrl(url, lang) {
+    // Parse existing parameters
+    const urlObject = new URL(url);
     const params = urlObject.searchParams;
-    params.delete('lang');
-    params.append('lang', language);
-    urlObject.search = params.toString();
-    
-    mainWindow.loadURL(urlObject.toString());
+
+    // Check if lang parameter is set
+    if (lang) {
+        // Remove existing lang parameter
+        params.delete('lang');
+        
+        // Add the lang parameter
+        params.append('lang', lang);
+        
+        // Reconstruct the URL with updated parameters
+        urlObject.search = params.toString();
+    }
+
+    return urlObject.toString();
 }
 
 
