@@ -12,7 +12,7 @@ function createWindow() {
     if (process.platform === "linux") {
         icon = path.join(process.resourcesPath, "res", "icon.png")
     }
-    const {url, sid, captcha, timeout, fullUrl} = parseArgv();
+    const {url, sid, captcha, timeout, fullUrl, lang} = parseArgv();
     let resolveCaptcha = url != null && !sid && captcha != null;
 
     mainWindow = new BrowserWindow({
@@ -58,6 +58,26 @@ function createWindow() {
             mainWindow.center()
         }
     }
+	
+	const languages = [
+		["Bulgarian", "bg"],
+		["Czech", "cs"],
+		["German", "de"],
+		["Greek", "el"],
+		["English", "en"],
+		["Spanish", "es"],
+		["French", "fr"],
+		["Hungarian", "hu"],
+		["Italian", "it"],
+		["Lithuanian", "lt"],
+		["Polish", "pl"],
+		["Portuguese", "pt"],
+		["Romanian", "ro"],
+		["Russian", "ru"],
+		["Swedish", "sv"],
+		["Turkish", "tr"],
+		["Ukrainian", "uk"]
+	];
 
     contextMenu({
         menu: (actions, props, browserWindow, dictionarySuggestions) => [
@@ -80,8 +100,17 @@ function createWindow() {
             },
             actions.inspect(),
             actions.services(),
+            actions.separator(),
+			{
+				label: "Change Language",
+				submenu: languages.map(([languageName, languageCode]) => ({
+					label: languageName,
+					click: () => reloadWithLanguage(languageCode)
+				}))
+			}
         ]
     })
+
 
     mainWindow.webContents.userAgent = "BigpointClient/1.6.9"
     mainWindow.webContents.on("new-window", (event, url) => {
@@ -102,8 +131,9 @@ function createWindow() {
     mainWindow.loadURL("data:text/html;charset=UTF-8," + encodeURIComponent("<html></html>"))
         .then(r => {
             if ((url || fullUrl) && sid) {
+                const finalUrl = generateLangUrl(fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock"), lang)
                 mainWindow.webContents.session.cookies.set({url: url, name: "dosid", value: sid})
-                    .then(() => mainWindow.loadURL(fullUrl ? fullUrl : (url + "/indexInternal.es?action=internalDock")))
+                    .then(() => mainWindow.loadURL(finalUrl))
             } else if (resolveCaptcha) {
                 try {
                     mainWindow.webContents.debugger.attach('1.1')
@@ -145,7 +175,7 @@ app.on("window-all-closed", function () {
 })
 
 function parseArgv() {
-    let url = null, sid = null, captcha = null, timeout = -1, fullUrl = null;
+    let url = null, sid = null, captcha = null, timeout = -1, fullUrl = null, lang = null;
     for (let i = 0; i < process.argv.length; i++) {
         let temp = null;
         if ((temp = parse("--url", i)) != null)
@@ -158,8 +188,10 @@ function parseArgv() {
             captcha = temp;
         else if ((temp = parse("--exit", i)) != null)
             timeout = Number(temp)
+        else if ((temp = parse("--lang", i)) != null)
+            lang = temp
     }
-    return {url, sid, captcha, timeout, fullUrl};
+    return {url, sid, captcha, timeout, fullUrl, lang};
 }
 
 function parse(name, idx) {
@@ -184,6 +216,31 @@ function getFlashPath() {
     }
     return ""
 }
+
+function reloadWithLanguage(lang) {
+    mainWindow.loadURL(generateLangUrl(mainWindow.webContents.getURL(), lang));
+}
+
+function generateLangUrl(url, lang) {
+    // Parse existing parameters
+    const urlObject = new URL(url);
+    const params = urlObject.searchParams;
+
+    // Check if lang parameter is set
+    if (lang) {
+        // Remove existing lang parameter
+        params.delete('lang');
+        
+        // Add the lang parameter
+        params.append('lang', lang);
+        
+        // Reconstruct the URL with updated parameters
+        urlObject.search = params.toString();
+    }
+
+    return urlObject.toString();
+}
+
 
 function getCaptchaSiteBody(captchaSiteKey, timeout) {
     let body = `<html>
